@@ -18,10 +18,22 @@ Free Edition doesn't allow custom storage locations outside Unity
 Catalog Volumes.
 """
 
+import os
+import sys
+
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from shopstream.transforms.catalog_cleaning import clean_products, clean_reviews
+# The pipeline auto-adds only its OWN root folder to sys.path, not sibling
+# folders. transforms/ lives one level up and over from this file
+# (.../src/shopstream/pipelines/ -> .../src/shopstream/transforms/), so we
+# compute that path relative to this file's own location and add it
+# explicitly. This works in dev and prod alike since it never hardcodes a
+# username or repo name.
+_shopstream_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(_shopstream_root, "transforms"))
+
+from catalog_cleaning import clean_products, clean_reviews
 
 CATALOG = "shopstream_dev"
 LANDING_ROOT = f"/Volumes/{CATALOG}/raw/landing"
